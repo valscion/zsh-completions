@@ -16,3 +16,10 @@ fpath=(/path/to/somewhere/zsh-completions $fpath)
 ```
 
 Then the completions defined in this repository should be active.
+
+If not, you can run this to clear old completions:
+
+```zsh
+rm -f ~/.zcompdump
+compinit
+```
