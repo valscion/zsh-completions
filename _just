@@ -1,0 +1,55 @@
+#compdef just
+
+# Needed to prevent `_arguments` from altering the global environment
+local context state state_descr line curcontext="$curcontext"
+typeset -A opt_args
+
+__just_recipes() {
+  local _args
+  _args=($(just --summary))
+  compadd "$@" -k _args
+}
+
+
+_arguments -C \
+  '--dry-run[Print what just would do without doing it]' \
+  '--dump[Print entire justfile]' \
+  '(-e --edit)'{-e,--edit}'[Open justfile with $EDITOR]' \
+  '--evaluate[Print evaluated variables]' \
+  '--highlight[Highlight echoed recipe lines in bold]' \
+  '(-l --list)'{-l,--list}"[List available recipes and their arguments]" \
+  '(-q --quiet)'{-q,--quiet}"[Suppress all output]" \
+  '--summary[List names of available recipes]' \
+  '(-v --verbose)'{-v,--verbose}"[Use verbose output]" \
+  '(-h --help)'{-h,--help}"[Print help information]" \
+  '(-V --version)'{-V,--version}"[Print version information]" \
+  '--color[Print colorful output (auto, always, never)]:value:(auto always never)' \
+  ': :__just_recipes' \
+  '*: :->deeper' && ret=0
+
+case "$state" in
+  deeper)
+    if (( CURRENT > 3 )); then
+      _nothing
+    else
+      local _args _first_recipe
+      _first_recipe_name=($(echo $line | cut -d' ' -f1))
+      # echo "_first_recipe_name: '$_first_recipe_name'" >> test.log
+      _args=($(just $_first_recipe_name --summary 2> /dev/null))
+      if [[ -z "$_args" ]]; then
+        # There wasn't multiple deeper just tasks
+        _nothing
+      else
+        # echo >> test.log
+        # date >> test.log
+        # echo "CURRENT: $CURRENT" >> test.log
+        # echo "context: '$context'" >> test.log
+        # echo "curcontext: '$curcontext'" >> test.log
+        # echo "state: '$state'" >> test.log
+        # echo "state_descr: '$state_descr'" >> test.log
+        # echo "line: '$line'" >> test.log
+        # echo "opt_args: '$opt_args'" >> test.log
+        _values 'command' $_args
+      fi
+    fi
+esac
